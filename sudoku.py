@@ -12,7 +12,7 @@ class Sudoku:
         self.show_graphics = show_graphics
         self.board = board
 
-        print(self.to_string(board))
+        #print(self.to_string(board))   MI: probs not necessary 
 
 
         # initializing pygame and pygame windows
