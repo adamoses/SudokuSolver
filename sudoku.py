@@ -4,6 +4,7 @@ from copy import deepcopy
 import random
 from uninformed_search import *
 import sys
+import util
 
 class Sudoku:
 
@@ -12,7 +13,7 @@ class Sudoku:
         self.show_graphics = show_graphics
         self.board = board
 
-        #print(self.to_string(board))   MI: probs not necessary 
+        print(self.to_string(board))  
 
 
         # initializing pygame and pygame windows
@@ -187,6 +188,51 @@ class Sudoku:
                     string += str(board[y][x]) + ' '
                 
         return  string
+    
+    def getRow(self, index):
+        '''
+        Returns a list of 9 cell values following:
+
+        [valAt(index,0), valAt(index,1), ... , valAt(index,8)]
+        '''
+        row = []
+        for i in range(0,9):
+            row.append(self.board[index][i])
+        
+        return row
+
+    def getCol(self, index):
+        '''
+        Returns a list of 9 cell values following:
+
+        [valAt(0,index), valAt(1,index), ... , valAt(8,index)]
+        '''
+        col = []
+        for i in range(0,9):
+            col.append(self.board[i][index])
+
+        return col
+
+    def getBox(self, index):
+        '''
+        Returns a list of 9 cell values which are the values
+        at the box index according to : 
+
+        0 | 1 | 2
+        _ | _ | _
+        3 | 4 | 5
+        _ | _ | _
+        6 | 7 | 8
+        
+        '''
+        box = []
+        coords = util.box_dictionary[index]
+
+        for i in range(0,9):
+            x,y = coords[i]
+            box.append(self.board[y][x])
+
+        return box
                 
                 
 
