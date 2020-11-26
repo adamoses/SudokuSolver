@@ -1,5 +1,8 @@
 
 
+from pygame.sprite import collide_circle
+
+
 class Util:
 
     def __init__(self):
@@ -34,7 +37,7 @@ class Util:
         }
     
 
-    def allDiff(cell_list):
+    def allDiff(self, cell_list):
         '''
         Checks if a list of values is all different.
 
@@ -55,3 +58,18 @@ class Util:
         '''
         ## TODO: Implement if necessary in the future
         return False
+
+    def abstractRow(self, index):
+        row = []
+        for i in range(0,9):
+            row.append((index,i))
+        return row
+    
+    def abstractCol(self, index):
+        col = []
+        for i in range(0,9):
+            col.append((index, i))
+        return col 
+    
+    def abstractBox(self,index):
+        return self.abstractBox[index]
