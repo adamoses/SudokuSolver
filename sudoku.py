@@ -1,3 +1,4 @@
+from csp import *
 import math
 import numpy as np
 from copy import deepcopy
@@ -29,9 +30,16 @@ class Sudoku:
 
         uninformed = UninformedSearch(self)
 
-        self.board = uninformed.get_solution(uninformed.depthFirst)
+        csp = CSP(self)
+        backtracking = BackTrackingSearch(csp)
+        self.board = backtracking.search()
+        
+        #self.board = uninformed.get_solution(uninformed.depthFirst)
 
-        print(self.to_string(self.board))
+        if self.board is not None:
+            print(self.to_string(self.board))
+        else:
+            print("Couldn't find a solution")
 
         if self.show_graphics:
             while True:

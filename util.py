@@ -1,7 +1,7 @@
 
 
 from pygame.sprite import collide_circle
-
+import csp
 
 class Util:
 
@@ -36,40 +36,64 @@ class Util:
                  (8,6), (8,7), (8,8)]
         }
     
-
-    def allDiff(self, cell_list):
+    def hasSingleton(self, domain, cell_list):
         '''
-        Checks if a list of values is all different.
-
-        Returns: A boolean
+        Checks if a cell_list has at least one cell with a singleton domain
+        
+        Returns: A Boolean
         '''
-        comparison = set(cell_list).intersection(range(1, 10))
-
-        return len(comparison) == 9
-
-    def allDiff1(cell, type_check):
-        '''
-        Checks if a cell in a <type_check> is comprised of all different values in domain:
-                - row = 0
-                - col = 1
-                - box = 2
-
-        Returns: A boolean
-        '''
-        ## TODO: Implement if necessary in the future
+        for cell in cell_list:
+            if len(domain[cell]) == 1:
+                return True
         return False
 
-    def abstractRow(self, index):
+    def allDiff(self, csp, cell_list):
+        '''
+        Implementation of pseduocode 6.2.5 Global Constraints: AI, A Modern Approach 4e. (pg 188-189)
+        Checks to see if any assigned variables have conflictions (are the same assignment)
+
+        Returns: A boolean
+        '''
+        domains = csp.domains.copy()
+        cell_list = cell_list.copy()
+
+        domain_tracker = range(1,10) 
+
+        # while there are singleton variables left in cell_list
+        while self.hasSingleton(domains, cell_list):
+
+            # for all cells in the constraint
+            for cell in cell_list:
+                domain = domains[cell]  
+
+                # remove a cell that has singleton domain
+                if len(domain) == 1:
+                    cell_list.pop(cell)
+                    val = domain[0] 
+                    if val in domain_tracker:
+                        domain_tracker.pop(val)
+                    else:
+                        return False
+
+                    # delete the cell's value from the domain of remaining  
+                    for remaining in cell_list:
+                        d = set(domains[remaining])
+                        d.discard(val)
+                        domains[remaining] = list(d)
+
+        return True
+
+    def abstractRow(self,index):
         row = []
         for i in range(0,9):
             row.append((index,i))
         return row
     
-    def abstractCol(self, index):
+    def abstractCol(self,index):
         col = []
         for i in range(0,9):
             col.append((index, i))
         return col 
     
-    def abstractBox(self,index):
-        return self.abstractBox[index]
+    def abstractBox(self, index):
+        return self.box_dictionary[index]
