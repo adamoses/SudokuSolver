@@ -42,7 +42,7 @@ class BackTrackingSearch:
 
     def __init__(self, csp):
         self.initial_csp = csp
-        self.assignment = csp.initial_board.copy()
+        self.assignment = deepcopy(csp.initial_board)
         self.sudoku = csp.sudoku
     
     def selectVar(self,csp,assignment):
@@ -50,7 +50,9 @@ class BackTrackingSearch:
         Eventually implement mrv and degree heuristic
         '''
         unassigned = [k for k,v in iter(csp.variables.items()) if not v]
-        return unassigned[0]
+        if len(unassigned) > 0:
+            return unassigned[0]
+        raise Exception('Filled board with wrong values')
 
     def orderValues(self,csp,var,assignment):
         '''
@@ -68,11 +70,12 @@ class BackTrackingSearch:
         values = self.orderValues(csp, var, assignment) # order vals by least constraining
         for value in values:
             # check if value works on board
-            new_assignment = assignment.copy()
+            new_assignment = deepcopy(assignment)
             new_assignment[y][x] = value
             new_csp = csp
             new_csp.variables[(var)] = True
-            if new_csp.checkConstraints(new_assignment):
+            ass_is_good = new_csp.checkConstraints(new_assignment)
+            if ass_is_good:
                 result = self.backtrack(new_csp,new_assignment)
                 if result is not None:
                     return result

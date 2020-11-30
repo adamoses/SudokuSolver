@@ -57,7 +57,7 @@ class Util:
         domains = csp.domains.copy()
         cell_list = cell_list.copy()
 
-        domain_tracker = range(1,10) 
+        domain_tracker = [*range(1,10)] 
 
         # while there are singleton variables left in cell_list
         while self.hasSingleton(domains, cell_list):
@@ -92,7 +92,7 @@ class Util:
     def abstractCol(self,index):
         col = []
         for i in range(0,9):
-            col.append((index, i))
+            col.append((i, index))
         return col 
     
     def abstractBox(self, index):
