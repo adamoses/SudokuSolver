@@ -54,12 +54,12 @@ class Util:
 
         Returns: A boolean
         '''
-        domains = csp.domains.copy()
+        domains = csp.domains
         cell_list = cell_list.copy()
 
         domain_tracker = [*range(1,10)] 
 
-        # while there are singleton variables left in cell_list
+        # while there are singleton domain variables left in cell_list
         while self.hasSingleton(domains, cell_list):
 
             # for all cells in the constraint
@@ -68,10 +68,10 @@ class Util:
 
                 # remove a cell that has singleton domain
                 if len(domain) == 1:
-                    cell_list.pop(cell)
+                    cell_list.remove(cell)
                     val = domain[0] 
                     if val in domain_tracker:
-                        domain_tracker.pop(val)
+                        domain_tracker.remove(val)
                     else:
                         return False
 

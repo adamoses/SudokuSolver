@@ -23,7 +23,7 @@ class CSP:
             self.constraints.append((t_box,util.allDiff)) 
             for x in range(0,9):
                 if self.initial_board[y][x] == 0:   # For every variable not already assigned give it default domain 
-                    self.domains[(x,y)] = range(1,10)  
+                    self.domains[(x,y)] = [*range(1,10)]  
                     self.variables[(x,y)] = False       # Put cell from board in variables  
                 else:                                  # If already assigned give it domain with its value 
                     self.domains[(x,y)] = [self.initial_board[y][x]]
@@ -70,12 +70,12 @@ class BackTrackingSearch:
         values = self.orderValues(csp, var, assignment) # order vals by least constraining
         for value in values:
             # check if value works on board
-            new_assignment = deepcopy(assignment)
-            new_assignment[y][x] = value
+            new_assignment = csp.sudoku.generate_successor_board(assignment, x, y, value)
             new_csp = csp
             new_csp.variables[(var)] = True
             ass_is_good = new_csp.checkConstraints(new_assignment)
             if ass_is_good:
+                new_csp.domains[var] = [value]
                 result = self.backtrack(new_csp,new_assignment)
                 if result is not None:
                     return result
