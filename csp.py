@@ -53,17 +53,16 @@ class BackTrackingSearch:
         '''
         Eventually implement mrv and degree heuristic
         '''
+        pq = queue.PriorityQueue()  # order by length of domain
+
         for x in range(9):
             for y in range(9):
                 if assignment[x][y] == 0:
-                    return (x, y)
-        '''           
-        unassigned = [k for k,v in iter(domains.items()) if not len(v) == 1]
+                    pq.put((len(domains[(x,y)]),(x, y))) 
         
-        if len(unassigned) > 0:
-            return unassigned[0]
-        raise Exception('Filled board with wrong values')
-        '''
+        output = pq.get()
+        return output[1]
+
     def orderValues(self,var,domains):
         '''
         Eventually implement lcv
@@ -72,6 +71,9 @@ class BackTrackingSearch:
         return domains[var]
     
     def refactorDomains(self, val, var, domains):
+        '''
+        After every assignment, refactor the domains of all effected cells.
+        '''
         util = Util()
         x,y = var
 
@@ -113,22 +115,26 @@ class BackTrackingSearch:
 
     
     def backtrack(self, domains, assignment):
+        '''
+        Recursive algorithm that keeps track of cell domains and assignments and makes sudoku moves
+        based on what is possible. 
+        '''
         if self.sudoku.is_goal(assignment): # if board has properly been assigned, return
-            print("Cells expanded: ", self.cells_expanded)
             return assignment
         
         self.cells_expanded += 1
         var = self.selectVar(domains, assignment) # select next unassigned cell
         x, y = var
-        possible_values = self.orderValues(var, domains) # self.sudoku.get_possible_values(assignment, x, y) #self.orderValues(var, domains) # get a list of possible values from domain
+        possible_values = self.orderValues(var, domains) # get a list of possible values from domain
         for value in possible_values:
-            # check if value works on board
             new_assignment = deepcopy(assignment)
             new_assignment[x][y] = value            # assign val from left over domain
-            self.sudoku.render_board(new_assignment)
             new_domains = deepcopy(domains)             
             new_domains[var] = [value]
+            
             self.refactorDomains(value,var,new_domains) # restructure all affected domains
+            self.sudoku.render_board(new_assignment)
+
             result = self.backtrack(new_domains,new_assignment)
             if result is not None:
                 return result
@@ -136,9 +142,14 @@ class BackTrackingSearch:
         return None
 
     def search(self):
-        start = timeit.default_timer()
+        '''
+        Wrapper function for backtracking search that record the time and number of nodes expanded.
+        '''
+        start = timeit.default_timer() 
         output = self.backtrack(self.domains, self.assignment)
         end = timeit.default_timer()
+
+        print("Cells expanded: ", self.cells_expanded)
         print ("Time: ", end - start , "\n")
         print ("Output: ")
         return output
