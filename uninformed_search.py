@@ -66,9 +66,6 @@ class UninformedSearch:
     def depthFirst(self):
         '''
         Reference breadth-first for near identical deocumentation
-        
-        FOR ADAM******* do we need a reached list in breadth-first? // will there be times we expand the same 
-                        state twice ? 
         '''
         board = self.initial_board
         sudoku = self.sudoku

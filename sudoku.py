@@ -40,6 +40,7 @@ class Sudoku:
             print(self.to_string(self.board))
         else:
             print("Couldn't find a solution")
+            sys.exit()
 
         if self.show_graphics:
             while True:
