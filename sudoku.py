@@ -14,6 +14,7 @@ class Sudoku:
         self.show_graphics = show_graphics
         self.board = board
 
+        print("Input: ")
         print(self.to_string(board))  
 
 

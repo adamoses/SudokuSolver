@@ -3,6 +3,7 @@ import math
 import queue
 import random
 from util import *
+import timeit
 
 class CSP:
 
@@ -46,6 +47,7 @@ class BackTrackingSearch:
         self.assignment = deepcopy(csp.initial_board)
         self.domains = deepcopy(csp.domains)
         self.sudoku = csp.sudoku
+        self.cells_expanded = 0
     
     def selectVar(self,domains,assignment):
         '''
@@ -112,8 +114,10 @@ class BackTrackingSearch:
     
     def backtrack(self, domains, assignment):
         if self.sudoku.is_goal(assignment): # if board has properly been assigned, return
+            print("Cells expanded: ", self.cells_expanded)
             return assignment
         
+        self.cells_expanded += 1
         var = self.selectVar(domains, assignment) # select next unassigned cell
         x, y = var
         possible_values = self.orderValues(var, domains) # self.sudoku.get_possible_values(assignment, x, y) #self.orderValues(var, domains) # get a list of possible values from domain
@@ -132,7 +136,11 @@ class BackTrackingSearch:
         return None
 
     def search(self):
-        return self.backtrack(self.domains, self.assignment)
-        
+        start = timeit.default_timer()
+        output = self.backtrack(self.domains, self.assignment)
+        end = timeit.default_timer()
+        print ("Time: ", end - start , "\n")
+        print ("Output: ")
+        return output
     
 
