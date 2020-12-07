@@ -14,7 +14,7 @@ class Sudoku:
         self.show_graphics = show_graphics
         self.board = board
 
-        print(self.to_string(board))  
+        print(to_string(board))
 
 
         # initializing pygame and pygame windows
@@ -32,14 +32,11 @@ class Sudoku:
 
         csp = CSP(self)
         backtracking = BackTrackingSearch(csp)
-        self.board = backtracking.search()
+        self.board = uninformed.get_solution(uninformed.depthFirst)
         
         #self.board = uninformed.get_solution(uninformed.depthFirst)
 
-        if self.board is not None:
-            print(self.to_string(self.board))
-        else:
-            print("Couldn't find a solution")
+        print(to_string(self.board))
 
         if self.show_graphics:
             while True:
@@ -175,77 +172,50 @@ class Sudoku:
 
         return True
 
-    def to_string(self, board):
+    def next_square(self, board):
+        until_found = True              
+        x, y = 0, 0                     # init counter to top left cell
 
-        string = ''
+        while until_found:      # populate board one cell at a time
 
-        horizontal = '--------+-------+--------\n'
-
-        for y in range(0,9):
-            for x in range(0,9):
-                
-                if x == 3 or x == 6:
-                    string += '| ' + str(board[y][x]) + ' '
-                elif x == 8:
-                    string += str(board[y][x]) + ' |\n'
-                elif x == 0 and (y == 3 or y == 6):
-                    string += horizontal + '| ' + str(board[y][x]) + ' '
-                elif x == 0:
-                    string += '| ' + str(board[y][x]) + ' '
+            if board[y][x] == 0:     # if cell is empty 
+                until_found = False         # break loop
+                first_empty = (x, y)        # mark location of empty cell          
+            elif x == 8 and y < 8:      # if at end of a row 
+                x = 0                       # reset row pointer 
+                y += 1                      # inc col
+            elif y == 8 and x == 8:     # if at end of the board 
+                if self.is_goal(board):
+                    return board                 # then finished
                 else:
-                    string += str(board[y][x]) + ' '
-                
-        return  string
-    
-    def getRow(self, index):
-        '''
-        Returns a list of 9 cell values following:
+                    return None
+            else:
+                x += 1                  # else move to next cell in row
 
-        [valAt(index,0), valAt(index,1), ... , valAt(index,8)]
-        '''
-        row = []
-        for i in range(0,9):
-            row.append(self.board[index][i])
-        
-        return row
+        return first_empty
 
-    def getCol(self, index):
-        '''
-        Returns a list of 9 cell values following:
+def to_string(board):
 
-        [valAt(0,index), valAt(1,index), ... , valAt(8,index)]
-        '''
-        col = []
-        for i in range(0,9):
-            col.append(self.board[i][index])
+    string = ''
 
-        return col
+    horizontal = '--------+-------+--------\n'
 
-    def getBox(self, index):
-        '''
-        Returns a list of 9 cell values which are the values
-        at the box index according to : 
-
-        0 | 1 | 2
-        _ | _ | _
-        3 | 4 | 5
-        _ | _ | _
-        6 | 7 | 8
-        
-        '''
-        box = []
-        coords = util.box_dictionary[index]
-
-        for i in range(0,9):
-            x,y = coords[i]
-            box.append(self.board[y][x])
-
-        return box
-                
-                
-
-
-
+    for y in range(0,9):
+        for x in range(0,9):
+            
+            if x == 3 or x == 6:
+                string += '| ' + str(board[y][x]) + ' '
+            elif x == 8:
+                string += str(board[y][x]) + ' |\n'
+            elif x == 0 and (y == 3 or y == 6):
+                string += horizontal + '| ' + str(board[y][x]) + ' '
+            elif x == 0:
+                string += '| ' + str(board[y][x]) + ' '
+            else:
+                string += str(board[y][x]) + ' '
+            
+    return  string
+          
 
 
 if __name__ == "__main__":
@@ -253,6 +223,20 @@ if __name__ == "__main__":
 
     # The following chunk of code comes from https://www.kaggle.com/bryanpark/sudoku
     # It loads a million sudoku games into matrices conveniently formatted
+
+    import numpy as np
+    quizzes = np.zeros((5, 81), np.int32)
+    solutions = np.zeros((5, 81), np.int32)
+    for i, line in enumerate(open('hardSudokus.csv', 'r').read().splitlines()[1:]):
+        quiz, solution = line.split(",")
+        for j, q_s in enumerate(zip(quiz, solution)):
+            q, s = q_s
+            quizzes[i, j] = q
+            solutions[i, j] = s
+    quizzes = quizzes.reshape((-1, 9, 9))
+    solutions = solutions.reshape((-1, 9, 9))
+
+    board = quizzes[random.randint(0,5)].tolist()
 
     # import numpy as np
     # quizzes = np.zeros((1000000, 81), np.int32)
@@ -266,9 +250,19 @@ if __name__ == "__main__":
     # quizzes = quizzes.reshape((-1, 9, 9))
     # solutions = solutions.reshape((-1, 9, 9))
 
-    # board = quizzes[random.randint(1,999999)].tolist()
+    # board = quizzes[random.randint(0, 1000000)].tolist()
 
-    board = np.zeros(shape=(9,9), dtype=int).tolist()
+    # board = np.zeros(shape=(9,9), dtype=int).tolist()
+
+    # board = [[0,0,0,0,1,5,0,6,9],
+    #          [0,0,0,0,6,0,5,0,0],
+    #          [0,0,1,0,0,0,0,0,3],
+    #          [8,3,0,0,0,0,0,0,4],
+    #          [0,4,0,0,0,6,8,0,2],
+    #          [0,0,0,2,0,0,0,0,0],
+    #          [0,8,4,0,0,0,0,0,0],
+    #          [0,0,0,0,3,1,0,0,6],
+    #          [0,0,0,0,0,0,7,0,0]]
 
 
     s = Sudoku(board, show_graphics=True)
