@@ -1,7 +1,9 @@
 from copy import Error, deepcopy
+import math
 import queue
 import random
 from util import *
+import timeit
 
 class CSP:
 
@@ -14,19 +16,19 @@ class CSP:
         self.domains = {}           # A dictionary of domains for every variable    
         self.constraints = []       # List of 27 constraints <scope, relation>
         
-        for y in range(0,9):
-            t_row = util.abstractRow(y)
-            t_col = util.abstractCol(y)
-            t_box = util.abstractBox(y)
+        for x in range(0,9):
+            t_row = util.abstractRow(x)
+            t_col = util.abstractCol(x)
+            t_box = util.abstractBox(x)
             self.constraints.append((t_row,util.allDiff))
             self.constraints.append((t_col,util.allDiff))
             self.constraints.append((t_box,util.allDiff)) 
-            for x in range(0,9):
-                if self.initial_board[y][x] == 0:   # For every variable not already assigned give it default domain 
+            for y in range(0,9):
+                if self.initial_board[x][y] == 0:   # For every variable not already assigned give it default domain 
                     self.domains[(x,y)] = [*range(1,10)]  
                     self.variables[(x,y)] = False       # Put cell from board in variables  
                 else:                                  # If already assigned give it domain with its value 
-                    self.domains[(x,y)] = [self.initial_board[y][x]]
+                    self.domains[(x,y)] = [self.initial_board[x][y]]
                     self.variables[(x,y)] = True
     
     def checkConstraints(self,assignment):
@@ -41,51 +43,115 @@ class CSP:
 class BackTrackingSearch:
 
     def __init__(self, csp):
-        self.initial_csp = csp
+        self.csp = csp
         self.assignment = deepcopy(csp.initial_board)
+        self.domains = deepcopy(csp.domains)
         self.sudoku = csp.sudoku
+        self.cells_expanded = 0
     
-    def selectVar(self,csp,assignment):
+    def selectVar(self,domains,assignment):
         '''
         Eventually implement mrv and degree heuristic
         '''
-        unassigned = [k for k,v in iter(csp.variables.items()) if not v]
-        if len(unassigned) > 0:
-            return unassigned[0]
-        raise Exception('Filled board with wrong values')
+        pq = queue.PriorityQueue()  # order by length of domain
 
-    def orderValues(self,csp,var,assignment):
+        for x in range(9):
+            for y in range(9):
+                if assignment[x][y] == 0:
+                    pq.put((len(domains[(x,y)]),(x, y))) 
+        
+        output = pq.get()
+        return output[1]
+
+    def orderValues(self,var,domains):
         '''
         Eventually implement lcv
         Returns: A list of values in domain of var
         '''
-        return csp.domains[var]
+        return domains[var]
+    
+    def refactorDomains(self, val, var, domains):
+        '''
+        After every assignment, refactor the domains of all effected cells.
+        '''
+        util = Util()
+        x,y = var
 
-    def backtrack(self, csp, assignment):
+        box_num = 0
+        boxx, boxy = (math.floor(x/3), math.floor(y/3))
+        if boxx == 0:
+            box_num = boxy
+        if boxx == 1:
+            box_num = boxy + 3
+        if boxx == 2:
+            box_num = boxy + 6    
+
+        for cell in util.box_dictionary[box_num]:
+            try:
+                if not var == cell:
+                    domain = domains[cell]
+                    domain.remove(val)
+                    domains[cell] = domain
+            except ValueError:
+                pass
+
+        for i in range(9):
+            try:
+                if not var == (x,i):
+                    domain = domains[(x,i)]
+                    domain.remove(val)
+                    domains[(x,i)] = domain
+            except ValueError:
+                pass
+
+            try:
+                if not var == (i,y):
+                    domain = domains[(i,y)]
+                    domain.remove(val)
+                    domains[(i,y)] = domain
+            except ValueError:
+                pass
+            
+
+    
+    def backtrack(self, domains, assignment):
+        '''
+        Recursive algorithm that keeps track of cell domains and assignments and makes sudoku moves
+        based on what is possible. 
+        '''
         if self.sudoku.is_goal(assignment): # if board has properly been assigned, return
             return assignment
         
-        var = self.selectVar(csp, assignment) # select a cell with minimum remaining values in domain
+        self.cells_expanded += 1
+        var = self.selectVar(domains, assignment) # select next unassigned cell
         x, y = var
-        values = self.orderValues(csp, var, assignment) # order vals by least constraining
-        for value in values:
-            # check if value works on board
-            new_assignment = csp.sudoku.generate_successor_board(assignment, x, y, value)
-            new_csp = csp
-            new_csp.variables[(var)] = True
-            ass_is_good = new_csp.checkConstraints(new_assignment)
-            if ass_is_good:
-                new_csp.domains[var] = [value]
-                result = self.backtrack(new_csp,new_assignment)
-                if result is not None:
-                    return result
+        possible_values = self.orderValues(var, domains) # get a list of possible values from domain
+        for value in possible_values:
+            new_assignment = deepcopy(assignment)
+            new_assignment[x][y] = value            # assign val from left over domain
+            new_domains = deepcopy(domains)             
+            new_domains[var] = [value]
+            
+            self.refactorDomains(value,var,new_domains) # restructure all affected domains
+            self.sudoku.render_board(new_assignment)
+
+            result = self.backtrack(new_domains,new_assignment)
+            if result is not None:
+                return result
 
         return None
 
-
-
     def search(self):
-        return self.backtrack(self.initial_csp, self.assignment.copy())
-        
+        '''
+        Wrapper function for backtracking search that record the time and number of nodes expanded.
+        '''
+        start = timeit.default_timer() 
+        output = self.backtrack(self.domains, self.assignment)
+        end = timeit.default_timer()
+
+        print("Cells expanded: ", self.cells_expanded)
+        print ("Time: ", end - start , "\n")
+        print ("Output: ")
+        return output
     
 

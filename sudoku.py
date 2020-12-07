@@ -14,7 +14,8 @@ class Sudoku:
         self.show_graphics = show_graphics
         self.board = board
 
-        print(to_string(board))
+        print("Input: ")
+        print(self.to_string(board))  
 
 
         # initializing pygame and pygame windows
@@ -36,7 +37,11 @@ class Sudoku:
         
         #self.board = uninformed.get_solution(uninformed.depthFirst)
 
-        print(to_string(self.board))
+        if self.board is not None:
+            print(self.to_string(self.board))
+        else:
+            print("Couldn't find a solution")
+            sys.exit()
 
         if self.show_graphics:
             while True:
