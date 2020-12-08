@@ -15,7 +15,7 @@ class Sudoku:
         self.board = board
 
         print("Input: ")
-        print(self.to_string(board))  
+        print(to_string(board))  
 
 
         # initializing pygame and pygame windows
@@ -33,12 +33,11 @@ class Sudoku:
 
         csp = CSP(self)
         backtracking = BackTrackingSearch(csp)
-        self.board = uninformed.get_solution(uninformed.depthFirst)
-        
+        self.board = backtracking.search()
         #self.board = uninformed.get_solution(uninformed.depthFirst)
 
         if self.board is not None:
-            print(self.to_string(self.board))
+            print(to_string(self.board))
         else:
             print("Couldn't find a solution")
             sys.exit()

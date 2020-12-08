@@ -13,16 +13,9 @@ class CSP:
         self.initial_board = sudoku.board
 
         self.variables = {}         # A dictionary of cell coordinates
-        self.domains = {}           # A dictionary of domains for every variable    
-        self.constraints = []       # List of 27 constraints <scope, relation>
+        self.domains = {}           # A dictionary of domains for every variable
         
-        for x in range(0,9):
-            t_row = util.abstractRow(x)
-            t_col = util.abstractCol(x)
-            t_box = util.abstractBox(x)
-            self.constraints.append((t_row,util.allDiff))
-            self.constraints.append((t_col,util.allDiff))
-            self.constraints.append((t_box,util.allDiff)) 
+        for x in range(0,9): 
             for y in range(0,9):
                 if self.initial_board[x][y] == 0:   # For every variable not already assigned give it default domain 
                     self.domains[(x,y)] = [*range(1,10)]  
@@ -30,6 +23,11 @@ class CSP:
                 else:                                  # If already assigned give it domain with its value 
                     self.domains[(x,y)] = [self.initial_board[x][y]]
                     self.variables[(x,y)] = True
+        
+        for var, b in self.variables.items():
+            if b:
+                x,y = var
+                util.refactorDomains(self.initial_board[x][y],(x,y),self.domains)
     
     def checkConstraints(self,assignment):
         for constraint in self.constraints:
@@ -48,10 +46,11 @@ class BackTrackingSearch:
         self.domains = deepcopy(csp.domains)
         self.sudoku = csp.sudoku
         self.cells_expanded = 0
+        self.util = Util()
     
     def selectVar(self,domains,assignment):
         '''
-        Eventually implement mrv and degree heuristic
+        Selects variable by the MRV heuristic.
         '''
         pq = queue.PriorityQueue()  # order by length of domain
 
@@ -60,7 +59,7 @@ class BackTrackingSearch:
                 if assignment[x][y] == 0:
                     pq.put((len(domains[(x,y)]),(x, y))) 
         
-        output = pq.get()
+        output = pq.get()   # get the cell with fewest remaining options
         return output[1]
 
     def orderValues(self,var,domains):
@@ -69,50 +68,6 @@ class BackTrackingSearch:
         Returns: A list of values in domain of var
         '''
         return domains[var]
-    
-    def refactorDomains(self, val, var, domains):
-        '''
-        After every assignment, refactor the domains of all effected cells.
-        '''
-        util = Util()
-        x,y = var
-
-        box_num = 0
-        boxx, boxy = (math.floor(x/3), math.floor(y/3))
-        if boxx == 0:
-            box_num = boxy
-        if boxx == 1:
-            box_num = boxy + 3
-        if boxx == 2:
-            box_num = boxy + 6    
-
-        for cell in util.box_dictionary[box_num]:
-            try:
-                if not var == cell:
-                    domain = domains[cell]
-                    domain.remove(val)
-                    domains[cell] = domain
-            except ValueError:
-                pass
-
-        for i in range(9):
-            try:
-                if not var == (x,i):
-                    domain = domains[(x,i)]
-                    domain.remove(val)
-                    domains[(x,i)] = domain
-            except ValueError:
-                pass
-
-            try:
-                if not var == (i,y):
-                    domain = domains[(i,y)]
-                    domain.remove(val)
-                    domains[(i,y)] = domain
-            except ValueError:
-                pass
-            
-
     
     def backtrack(self, domains, assignment):
         '''
@@ -132,8 +87,8 @@ class BackTrackingSearch:
             new_domains = deepcopy(domains)             
             new_domains[var] = [value]
             
-            self.refactorDomains(value,var,new_domains) # restructure all affected domains
-            self.sudoku.render_board(new_assignment)
+            self.util.refactorDomains(value,var,new_domains) # restructure all affected domains
+            #self.sudoku.render_board(new_assignment)
 
             result = self.backtrack(new_domains,new_assignment)
             if result is not None:

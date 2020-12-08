@@ -1,5 +1,6 @@
 
 
+import math
 from pygame.sprite import collide_circle
 import csp
 
@@ -36,6 +37,47 @@ class Util:
                  (8,6), (8,7), (8,8)]
         }
     
+    def refactorDomains(self,val, var, domains):
+        '''
+        After every assignment, refactor the domains of all effected cells.
+        '''
+        x,y = var
+
+        box_num = 0
+        boxx, boxy = (math.floor(x/3), math.floor(y/3))
+        if boxx == 0:
+            box_num = boxy
+        if boxx == 1:
+            box_num = boxy + 3
+        if boxx == 2:
+            box_num = boxy + 6    
+
+        for cell in self.box_dictionary[box_num]:
+            try:
+                if not var == cell:
+                    domain = domains[cell]
+                    domain.remove(val)
+                    domains[cell] = domain
+            except ValueError:
+                pass
+
+        for i in range(9):
+            try:
+                if not var == (x,i):
+                    domain = domains[(x,i)]
+                    domain.remove(val)
+                    domains[(x,i)] = domain
+            except ValueError:
+                pass
+
+            try:
+                if not var == (i,y):
+                    domain = domains[(i,y)]
+                    domain.remove(val)
+                    domains[(i,y)] = domain
+            except ValueError:
+                pass
+            
     def hasSingleton(self, domain, cell_list):
         '''
         Checks if a cell_list has at least one cell with a singleton domain
