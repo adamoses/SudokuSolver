@@ -5,10 +5,11 @@ from sudoku import to_string
 
 class UninformedSearch:
 
-    def __init__(self, sudoku):
+    def __init__(self, sudoku, informed=False):
 
         self.sudoku = sudoku
         self.initial_board = sudoku.board
+        self.informed = informed
 
     def get_solution(self, func):
         return func()
@@ -37,7 +38,10 @@ class UninformedSearch:
                 continue
 
             # get list of possible values for a cell
-            poss_values = sudoku.get_possible_values(newBoard, first_empty[0], first_empty[1])
+            if self.informed:
+                poss_values = sudoku.get_possible_values(newBoard, first_empty[0], first_empty[1])
+            else:
+                poss_values = list(range(1,10))
 
             # for each possible value
             for new_val in poss_values:
@@ -78,8 +82,10 @@ class UninformedSearch:
                 continue
 
 
-            poss_values = list(range(1,10)) #sudoku.get_possible_values(board, first_empty[0], first_empty[1])
-
+            if self.informed:
+                poss_values = sudoku.get_possible_values(board, first_empty[0], first_empty[1])
+            else:
+                poss_values = list(range(1,10))
 
             for new_val in poss_values:
                 child = sudoku.generate_successor_board(board, first_empty[0], first_empty[1], new_val)

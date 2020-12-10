@@ -9,7 +9,7 @@ import util
 
 class Sudoku:
 
-    def __init__(self, board, show_graphics = True):
+    def __init__(self, board, search_func, show_graphics = True):
 
         self.show_graphics = show_graphics
         self.board = board
@@ -29,12 +29,23 @@ class Sudoku:
             WHITE = (255, 255, 255)
             self.render_board(self.board)
 
-        uninformed = UninformedSearch(self)
 
-        csp = CSP(self)
-        backtracking = BackTrackingSearch(csp)
-        #self.board = backtracking.search()
-        #self.board = uninformed.get_solution(uninformed.depthFirst)
+        if search_func == '-CSP_backtrack':
+            csp = CSP(self)
+            backtracking = BackTrackingSearch(csp)
+            self.board = backtracking.search()
+        elif search_func == '-BFS_uninformed':
+            uninformed = UninformedSearch(self, informed=False)
+            self.board = uninformed.get_solution(uninformed.breadthFirst)
+        elif search_func == '-BFS_informed':
+            uninformed = UninformedSearch(self, informed=True)
+            self.board = uninformed.get_solution(uninformed.breadthFirst) 
+        elif search_func == '-DFS_uninformed':
+            uninformed = UninformedSearch(self, informed=False)
+            self.board = uninformed.get_solution(uninformed.depthFirst)
+        elif search_func == '-DFS_informed':
+            uninformed = UninformedSearch(self, informed=True)
+            self.board = uninformed.get_solution(uninformed.depthFirst)
 
         if self.board is not None:
             print(to_string(self.board))
@@ -240,36 +251,11 @@ if __name__ == "__main__":
     quizzes = quizzes.reshape((-1, 9, 9))
     solutions = solutions.reshape((-1, 9, 9))
 
-    board = quizzes[5].tolist()
+    board = quizzes[2].tolist()
 
-    # import numpy as np
-    # quizzes = np.zeros((1000000, 81), np.int32)
-    # solutions = np.zeros((1000000, 81), np.int32)
-    # for i, line in enumerate(open('sudoku.csv', 'r').read().splitlines()[1:]):
-    #     quiz, solution = line.split(",")
-    #     for j, q_s in enumerate(zip(quiz, solution)):
-    #         q, s = q_s
-    #         quizzes[i, j] = q
-    #         solutions[i, j] = s
-    # quizzes = quizzes.reshape((-1, 9, 9))
-    # solutions = solutions.reshape((-1, 9, 9))
-
-    # board = quizzes[random.randint(0, 1000000)].tolist()
-
-    # board = np.zeros(shape=(9,9), dtype=int).tolist()
-
-    # board = [[0,0,0,0,1,5,0,6,9],
-    #          [0,0,0,0,6,0,5,0,0],
-    #          [0,0,1,0,0,0,0,0,3],
-    #          [8,3,0,0,0,0,0,0,4],
-    #          [0,4,0,0,0,6,8,0,2],
-    #          [0,0,0,2,0,0,0,0,0],
-    #          [0,8,4,0,0,0,0,0,0],
-    #          [0,0,0,0,3,1,0,0,6],
-    #          [0,0,0,0,0,0,7,0,0]]
+    #board = np.zeros(shape=(9,9), dtype=int).tolist()
 
     # Medium difficulty board
-
     # board = [[0,0,0,0,6,4,0,0,3],
     #          [0,3,0,0,0,0,1,0,0],
     #          [0,8,5,0,0,0,0,0,7],
@@ -280,5 +266,9 @@ if __name__ == "__main__":
     #          [3,0,0,0,1,0,0,0,0],
     #          [0,9,0,6,8,0,0,0,0]]
 
+    if len(sys.argv) > 2 and sys.argv[2] == '-g':
+        show = True
+    else:
+        show = False
 
-    s = Sudoku(board, show_graphics=True)
+    s = Sudoku(board, sys.argv[1], show_graphics=show)
