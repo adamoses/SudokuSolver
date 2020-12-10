@@ -37,7 +37,7 @@ class UninformedSearch:
                 continue
 
             # get list of possible values for a cell
-            poss_values = list(range(1,10))#sudoku.get_possible_values(newBoard, first_empty[0], first_empty[1])
+            poss_values = sudoku.get_possible_values(newBoard, first_empty[0], first_empty[1])
 
             # for each possible value
             for new_val in poss_values:

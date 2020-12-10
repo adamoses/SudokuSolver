@@ -33,7 +33,7 @@ class Sudoku:
 
         csp = CSP(self)
         backtracking = BackTrackingSearch(csp)
-        self.board = backtracking.search()
+        #self.board = backtracking.search()
         #self.board = uninformed.get_solution(uninformed.depthFirst)
 
         if self.board is not None:
@@ -229,8 +229,8 @@ if __name__ == "__main__":
     # It loads a million sudoku games into matrices conveniently formatted
 
     import numpy as np
-    quizzes = np.zeros((5, 81), np.int32)
-    solutions = np.zeros((5, 81), np.int32)
+    quizzes = np.zeros((6, 81), np.int32)
+    solutions = np.zeros((6, 81), np.int32)
     for i, line in enumerate(open('hardSudokus.csv', 'r').read().splitlines()[1:]):
         quiz, solution = line.split(",")
         for j, q_s in enumerate(zip(quiz, solution)):
@@ -240,7 +240,7 @@ if __name__ == "__main__":
     quizzes = quizzes.reshape((-1, 9, 9))
     solutions = solutions.reshape((-1, 9, 9))
 
-    board = quizzes[random.randint(0,5)].tolist()
+    board = quizzes[5].tolist()
 
     # import numpy as np
     # quizzes = np.zeros((1000000, 81), np.int32)
@@ -267,6 +267,18 @@ if __name__ == "__main__":
     #          [0,8,4,0,0,0,0,0,0],
     #          [0,0,0,0,3,1,0,0,6],
     #          [0,0,0,0,0,0,7,0,0]]
+
+    # Medium difficulty board
+
+    # board = [[0,0,0,0,6,4,0,0,3],
+    #          [0,3,0,0,0,0,1,0,0],
+    #          [0,8,5,0,0,0,0,0,7],
+    #          [0,5,1,3,0,9,7,0,2],
+    #          [0,7,0,2,0,0,8,0,0],
+    #          [9,2,0,0,7,0,3,5,0],
+    #          [0,0,0,4,2,0,0,0,1],
+    #          [3,0,0,0,1,0,0,0,0],
+    #          [0,9,0,6,8,0,0,0,0]]
 
 
     s = Sudoku(board, show_graphics=True)
