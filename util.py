@@ -4,6 +4,7 @@ import math
 from pygame.sprite import collide_circle
 import csp
 import numpy as np
+from copy import deepcopy
 
 class Util:
 
@@ -150,25 +151,41 @@ class Util:
         # pruned to remove those values from remaining cells in the same
         # box, column, or row.
 
-        for row in np.arange(9):
-            cells = []
+        comparison = None
+
+        # while loop is so that we check for naked sets multiple times until we ensure 
+        # no more exist. By pruning values, we might be creating new naked sets, so we 
+        # have to check again.
+        while(not domains == comparison):
+
+            # Must create a deep copy because python is passing by reference. We are
+            # changing the internal domains contained in the dictionary. Deep copy will
+            # copy those internal domains instead of just a copy of the dictionary with 
+            # pointers to the same domains
+            comparison = deepcopy(domains)
+
+            for row in np.arange(9):
+                cells = []
+
+                for col in np.arange(0,9):
+                    # add every cell in this column
+                    cells.append((row, col))
+                    
+                # look for naked sets in each column
+                domains = self.naked_set_helper(domains, cells)
 
             for col in np.arange(0,9):
-                # add every cell in this column
-                cells.append((row, col))
+                cells = []
+
+                for row in np.arange(0,9):
+                    # add every cell in this row
+                    cells.append((row, col))
                 
-            # look for naked sets in each column
-            domains = self.naked_set_helper(domains, cells)
+                # look for naked sets in each row
+                domains = self.naked_set_helper(domains, cells)
 
-        for col in np.arange(0,9):
-            cells = []
-
-            for row in np.arange(0,9):
-                # add every cell in this row
-                cells.append((row, col))
-            
-            # look for naked sets in each row
-            domains = self.naked_set_helper(domains, cells)
+            for box in self.box_dictionary:
+                domains = self.naked_set_helper(domains, self.box_dictionary[box])
             
         return domains
 
