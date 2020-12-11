@@ -1,7 +1,7 @@
 import sudoku
 import queue
 import random
-from sudoku import to_string
+from sudoku import *
 
 class UninformedSearch:
 
@@ -39,7 +39,7 @@ class UninformedSearch:
 
             # get list of possible values for a cell
             if self.informed:
-                poss_values = sudoku.get_possible_values(newBoard, first_empty[0], first_empty[1])
+                poss_values = get_possible_values(newBoard, first_empty[0], first_empty[1])
             else:
                 poss_values = list(range(1,10))
 
@@ -83,7 +83,7 @@ class UninformedSearch:
 
 
             if self.informed:
-                poss_values = sudoku.get_possible_values(board, first_empty[0], first_empty[1])
+                poss_values = get_possible_values(board, first_empty[0], first_empty[1])
             else:
                 poss_values = list(range(1,10))
 

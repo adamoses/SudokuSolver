@@ -3,6 +3,7 @@
 import math
 from pygame.sprite import collide_circle
 import csp
+import numpy as np
 
 class Util:
 
@@ -139,3 +140,77 @@ class Util:
     
     def abstractBox(self, index):
         return self.box_dictionary[index]
+
+
+    def naked_set(self, domains):   
+
+        # this function should recognize when a unique set of values 
+        # share the same unique cells. This is only applied when the 
+        # cells are in the same box, column, or row. The domain is then
+        # pruned to remove those values from remaining cells in the same
+        # box, column, or row.
+
+        for row in np.arange(9):
+            cells = []
+
+            for col in np.arange(0,9):
+                # add every cell in this column
+                cells.append((row, col))
+                
+            # look for naked sets in each column
+            domains = self.naked_set_helper(domains, cells)
+
+        for col in np.arange(0,9):
+            cells = []
+
+            for row in np.arange(0,9):
+                # add every cell in this row
+                cells.append((row, col))
+            
+            # look for naked sets in each row
+            domains = self.naked_set_helper(domains, cells)
+            
+        return domains
+
+
+    def naked_set_helper(self, domains, cells):
+
+        # keep track of the unique domains and all domains we come across
+        # (all_domains will be used to refer to frequency of a domain)
+        unique_domains = []
+        all_domains = []
+
+        # for each set in this row/col/box
+        for cell in cells:
+
+            # if domain of this cell is not in unique_domains, place it in there
+            if not domains[cell] in unique_domains:
+                unique_domains.append(domains[cell])
+
+            # add domain to all_domains 
+            all_domains.append(domains[cell])
+
+        # looking at each unique domain
+        for domain in unique_domains:
+
+            # check if it occurs more than once
+            # check that the frequency is equal to number of values in that domain
+            # if both these conditions are satisfied, we found a naked set 
+            if all_domains.count(domain) > 1 and all_domains.count(domain) == len(domain):
+
+                # now we are going to check the domains of all the other cells
+                for cell in cells:
+
+                    # if this domain is the naked set we found, ignore it
+                    if set(domains[cell]) == set(domain):
+                        continue
+                    
+                    # otherwise, iterate through the values in that domain
+                    for value in domains[cell]:
+
+                        # if a value is in the naked set we found
+                        if value in domain:
+                             # remove it
+                            domains[cell].remove(value)
+                            
+        return domains

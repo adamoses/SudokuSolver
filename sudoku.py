@@ -136,34 +136,6 @@ class Sudoku:
         return new_board
 
 
-
-
-    def get_possible_values(self, board, x, y):
-
-        # start with all the values possible
-        possible_vals = set(range(1,10))
-
-        # determine which box we are in 
-        boxx, boxy = (math.floor(x/3), math.floor(y/3))
-
-        # determine which values are in the same row
-        in_row = set([i for i in board[y]])
-
-        # determine which values are in the same column
-        in_col = set([i for i in [board[j][x] for j in range(9)]])
-
-        # determine which values are in the same box
-        in_box = set(np.array([i for i in [board[j][boxx*3: boxx*3+3] for j in range(boxy*3,boxy*3+3)]]).flatten())
-        
-        # take the union of all those 
-        not_possible = in_row.union(in_col, in_box)
-
-        # and the possible values are those that remain
-        possible_vals = possible_vals.difference(not_possible)
-
-        return list(possible_vals)
-
-
     def is_goal(self, board):
 
         for x in range(9):
@@ -208,6 +180,31 @@ class Sudoku:
                 x += 1                  # else move to next cell in row
 
         return first_empty
+
+def get_possible_values(board, x, y):
+
+    # start with all the values possible
+    possible_vals = set(range(1,10))
+
+    # determine which box we are in 
+    boxx, boxy = (math.floor(x/3), math.floor(y/3))
+
+    # determine which values are in the same row
+    in_row = set([i for i in board[y]])
+
+    # determine which values are in the same column
+    in_col = set([i for i in [board[j][x] for j in range(9)]])
+
+    # determine which values are in the same box
+    in_box = set(np.array([i for i in [board[j][boxx*3: boxx*3+3] for j in range(boxy*3,boxy*3+3)]]).flatten())
+    
+    # take the union of all those 
+    not_possible = in_row.union(in_col, in_box)
+
+    # and the possible values are those that remain
+    possible_vals = possible_vals.difference(not_possible)
+
+    return list(possible_vals)
 
 def to_string(board):
 
