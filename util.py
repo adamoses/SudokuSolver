@@ -142,6 +142,30 @@ class Util:
     def abstractBox(self, index):
         return self.box_dictionary[index]
 
+    def remove_if_in_domain(self, values, domains, cells):
+
+        # this function removes values from the domain 
+        # of cells wherever it occurs
+
+        for val in values:
+            for cell in cells:
+                if val in domains[cell]:
+                    domains[cell].remove(val)
+
+        return domains
+
+    def find_box(self, cell):
+
+        # this function returns the int corresponding to the box
+        # that the cell is located in 
+
+        for box in self.box_dictionary:
+
+            if (cell in self.box_dictionary[box]):
+                return box
+
+        return None
+
 
     def naked_set(self, domains):   
 
@@ -222,12 +246,141 @@ class Util:
                     if set(domains[cell]) == set(domain):
                         continue
                     
-                    # otherwise, iterate through the values in that domain
-                    for value in domains[cell]:
-
-                        # if a value is in the naked set we found
-                        if value in domain:
-                             # remove it
-                            domains[cell].remove(value)
+                    self.remove_if_in_domain(domain, domains, [cell])
                             
         return domains
+
+    def pointing_set(self, domains):
+
+        comparison = None
+
+        while(not domains == comparison):
+
+            comparison = deepcopy(domains)
+
+            # for this technique, we want to check if the values in a box
+            # only occur in the same row or column. If that were the case,
+            # we can remove that value in the remainder of the row/column
+            for box in self.box_dictionary:
+                new_domains = self.pointing_set_helper(domains, box)
+
+        return domains
+
+
+
+    def pointing_set_helper(self, domains, box):
+
+        # iterate through each possible number 
+
+        for n in np.arange(1,10):
+
+            # hold all the rows and cols containing n
+            rows = []
+            cols = []
+
+            for cell in self.box_dictionary[box]:
+
+                if n in domains[cell]:
+                    rows.append(cell[0])
+                    cols.append(cell[1])
+
+            rows = list(set(rows))
+            cols = list(set(cols))
+
+            # checking that a number is contained in only one row but multiple columns will
+            # stop us from executing the case where we have a singleton domain
+            if len(rows) == 1 and len(cols) > 1:
+                
+                row = rows[0]
+                cells = []
+
+                # identify all the cells in that row but not in that box
+                for col in np.arange(0,9):
+                    if not (row, col) in self.box_dictionary[box]:
+                        cells.append((row, col))
+
+                domains = self.remove_if_in_domain([n], domains, cells)
+
+            elif len(cols) == 1 and len(rows) > 1:
+                col = cols[0]
+                cells = []
+
+                for row in np.arange(0,9):
+                    if not (row, col) in self.box_dictionary[box]:
+                        cells.append((row, col))
+
+                domains = self.remove_if_in_domain([n], domains, cells)
+
+        return domains
+
+    def box_reduction(self, domains):
+
+        comparison = None
+
+        while(not domains == comparison):
+
+            comparison = deepcopy(domains)
+
+            # for this technique, we want to check if the values in a row or column
+            # only occur in the same box. If that were the case,
+            # we can remove that value in the remainder of the box
+            for row in np.arange(9):
+                cells = []
+
+                for col in np.arange(0,9):
+                    # add every cell in this column
+                    cells.append((row, col))
+                    
+      
+                # look for box reduction in each column
+                domains = self.box_redux_helper(domains, cells)
+
+            for col in np.arange(0,9):
+                cells = []
+
+                for row in np.arange(0,9):
+                    # add every cell in this row
+                    cells.append((row, col))
+                
+                # look for naked sets in each row
+                domains = self.box_redux_helper(domains, cells)
+
+        return domains
+
+    def box_redux_helper(self, domains, cells):
+
+        # iterate through each possible number 
+
+        for n in np.arange(1,10):
+
+            # hold the boxes containing n
+            boxes = []
+
+            for cell in cells:
+
+                if n in domains[cell] and len(domains[cell]) > 1:
+                    box = self.find_box(cell)
+                    boxes.append(box)
+
+            boxes = list(set(boxes))
+
+            
+
+            # checking that a number is contained in only one box
+            if len(boxes) == 1:
+                
+                box = boxes[0]
+
+                print('Box ', box, 'contains all the values', n, 'in these cells:', cells, '\n\n')
+
+                # identify all the cells in that box but not in that row/col 
+                remove_cells = []
+                
+                for cell in self.box_dictionary[box]:
+                    if not cell in cells:
+                        remove_cells.append(cell)
+
+                domains = self.remove_if_in_domain([n], domains, remove_cells)
+
+        return domains
+

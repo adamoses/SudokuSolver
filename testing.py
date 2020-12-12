@@ -24,6 +24,12 @@ for x in np.arange(0,9):
         else:
             domains[cell] = [board[y][x]]
 
+
 # exhaustively improving the domain until all naked/hidden sets are handled
 util = Util()
-new_domains = util.naked_set(domains)
+
+print(domains)
+domains = util.box_reduction(domains)
+
+print(domains)
+
