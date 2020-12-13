@@ -28,6 +28,7 @@ class CSP:
             if b:
                 x,y = var
                 util.refactorDomains(self.initial_board[x][y],(x,y),self.domains)
+
     
     def checkConstraints(self,assignment):
         for constraint in self.constraints:
@@ -40,13 +41,16 @@ class CSP:
 
 class BackTrackingSearch:
 
-    def __init__(self, csp):
+    def __init__(self, csp, graphics = False, human=False):
         self.csp = csp
         self.assignment = deepcopy(csp.initial_board)
         self.domains = deepcopy(csp.domains)
         self.sudoku = csp.sudoku
         self.cells_expanded = 0
-        self.util = Util()
+        self.graphics = graphics
+        self.util = Util(human=human)
+
+        self.time = None
     
     def selectVar(self,domains,assignment):
         '''
@@ -88,7 +92,10 @@ class BackTrackingSearch:
             new_domains[var] = [value]
             
             self.util.refactorDomains(value,var,new_domains) # restructure all affected domains
-            #self.sudoku.render_board(new_assignment)
+            
+
+            if self.graphics:
+                self.sudoku.render_board(new_assignment)
 
             result = self.backtrack(new_domains,new_assignment)
             if result is not None:
@@ -103,6 +110,8 @@ class BackTrackingSearch:
         start = timeit.default_timer() 
         output = self.backtrack(self.domains, self.assignment)
         end = timeit.default_timer()
+
+        self.time = end-start
 
         print("Cells expanded: ", self.cells_expanded)
         print ("Time: ", end - start , "\n")

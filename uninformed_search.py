@@ -10,6 +10,7 @@ class UninformedSearch:
         self.sudoku = sudoku
         self.initial_board = sudoku.board
         self.informed = informed
+        self.expansions = 0
 
     def get_solution(self, func):
         return func()
@@ -39,7 +40,7 @@ class UninformedSearch:
 
             # get list of possible values for a cell
             if self.informed:
-                poss_values = get_possible_values(newBoard, first_empty[0], first_empty[1])
+                poss_values = sudoku.get_possible_values(newBoard, first_empty[0], first_empty[1])
             else:
                 poss_values = list(range(1,10))
 
@@ -47,6 +48,7 @@ class UninformedSearch:
             for new_val in poss_values:
                 # generate a new board with the new cell val at empty 
                 child = sudoku.generate_successor_board(newBoard, first_empty[0], first_empty[1], new_val)
+                self.expansions += 1
 
                 if sudoku.is_goal(child):   # if goal, return
                     return child
@@ -83,13 +85,13 @@ class UninformedSearch:
 
 
             if self.informed:
-                poss_values = get_possible_values(board, first_empty[0], first_empty[1])
+                poss_values = sudoku.get_possible_values(board, first_empty[0], first_empty[1])
             else:
                 poss_values = list(range(1,10))
 
             for new_val in poss_values:
                 child = sudoku.generate_successor_board(board, first_empty[0], first_empty[1], new_val)
-
+                self.expansions += 1
                 frontier.put(child)
 
         return None

@@ -1,35 +1,19 @@
-from util import *
-import numpy as np
-from sudoku import get_possible_values
+from sudoku import *
+import timeit
 
-# Easy difficulty board
-board = [[2,4,0,5,6,0,0,9,0],
-         [0,6,3,0,9,0,0,2,5],
-         [0,0,5,3,0,0,7,6,0],
-         [0,1,2,6,0,5,9,4,0],
-         [9,0,8,0,0,0,0,0,0],
-         [6,0,0,2,0,0,0,5,3],
-         [7,0,0,9,0,6,0,0,4],
-         [0,0,6,4,7,3,1,0,0],
-         [0,0,0,0,0,1,0,7,2]]
+boards = ['sudoku1.txt', 'sudoku2.txt', 'sudoku3.txt', 'sudoku4.txt', 'sudoku5.txt']
+boards = ['test_sudokus/' + b for b in boards]
 
-domains = {}
+for b in boards:
+    board = np.zeros(81, np.int32)
+    string = open(b, 'r').read()
+    for index, i in enumerate(string):
+        board[index] = i
 
-# these nester for-loops are just initiliazing the domains
-for x in np.arange(0,9):
-    for y in np.arange(0,9):
-        cell = (x, y)
-        if board[y][x] == 0:
-            domains[cell] = get_possible_values(board, x, y)
-        else:
-            domains[cell] = [board[y][x]]
+    board = board.reshape((9, 9))
+
+    Sudoku(board, '-DFS_informed', show_graphics = False)
 
 
-# exhaustively improving the domain until all naked/hidden sets are handled
-util = Util()
 
-print(domains)
-domains = util.box_reduction(domains)
-
-print(domains)
 

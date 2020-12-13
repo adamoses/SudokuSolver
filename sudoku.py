@@ -6,10 +6,12 @@ import random
 from uninformed_search import *
 import sys
 import util
+import timeit
+import pygame
 
 class Sudoku:
 
-    def __init__(self, board, search_func, show_graphics = True):
+    def __init__(self, board, search_func, show_graphics = False):
 
         self.show_graphics = show_graphics
         self.board = board
@@ -20,32 +22,63 @@ class Sudoku:
 
         # initializing pygame and pygame windows
         if self.show_graphics:
+            WHITE = (255, 255, 255)
+            done = False
             import pygame
             pygame.init()
-            done = False
             self.shape = (self.WIDTH, self.HEIGHT) = (500,500)
             self.window  = pygame.display.set_mode(size=self.shape, flags= pygame.RESIZABLE | pygame.SHOWN)
 
-            WHITE = (255, 255, 255)
             self.render_board(self.board)
 
 
         if search_func == '-CSP_backtrack':
             csp = CSP(self)
-            backtracking = BackTrackingSearch(csp)
+            backtracking = BackTrackingSearch(csp, graphics = show_graphics)
+            self.board = backtracking.search()
+
+        if search_func == '-CSP_backtrack_human':
+            csp = CSP(self)
+            backtracking = BackTrackingSearch(csp, graphics = show_graphics, human=True)
             self.board = backtracking.search()
         elif search_func == '-BFS_uninformed':
+
             uninformed = UninformedSearch(self, informed=False)
+            start = timeit.default_timer() 
             self.board = uninformed.get_solution(uninformed.breadthFirst)
+            end = timeit.default_timer()
+            time = end-start
+            print('Cells expanded: ', uninformed.expansions, '\n')
+            print('Time: ', time, '\n')
+            
         elif search_func == '-BFS_informed':
             uninformed = UninformedSearch(self, informed=True)
+
+            start = timeit.default_timer()
             self.board = uninformed.get_solution(uninformed.breadthFirst) 
+            end = timeit.default_timer()
+            time = end-start
+            print('Cells expanded: ', uninformed.expansions, '\n')
+            print('Time: ', time, '\n')
+
         elif search_func == '-DFS_uninformed':
             uninformed = UninformedSearch(self, informed=False)
+            start=timeit.default_timer()
             self.board = uninformed.get_solution(uninformed.depthFirst)
+            end=timeit.default_timer()
+            time = end-start
+            print('Cells expanded: ', uninformed.expansions, '\n')
+            print('Time: ', time, '\n')
+
         elif search_func == '-DFS_informed':
             uninformed = UninformedSearch(self, informed=True)
+            start=timeit.default_timer()
             self.board = uninformed.get_solution(uninformed.depthFirst)
+            end=timeit.default_timer()
+            time = end-start
+            print('Cells expanded: ', uninformed.expansions, '\n')
+            print('Time: ', time, '\n')
+
 
         if self.board is not None:
             print(to_string(self.board))
@@ -63,8 +96,6 @@ class Sudoku:
         
 
     def draw_grid(self):
-
-        import pygame
 
         BLACK = [0,0,0]
         WHITE = [255,255,255]
@@ -102,8 +133,6 @@ class Sudoku:
         pygame.draw.line(self.window, BLACK, (425, 25), (425, 475), 2)
 
     def render_board(self, board):
-
-        import pygame
 
         self.draw_grid()
 
@@ -181,30 +210,30 @@ class Sudoku:
 
         return first_empty
 
-def get_possible_values(board, x, y):
+    def get_possible_values(self, board, x, y):
 
-    # start with all the values possible
-    possible_vals = set(range(1,10))
+        # start with all the values possible
+        possible_vals = set(range(1,10))
 
-    # determine which box we are in 
-    boxx, boxy = (math.floor(x/3), math.floor(y/3))
+        # determine which box we are in 
+        boxx, boxy = (math.floor(x/3), math.floor(y/3))
 
-    # determine which values are in the same row
-    in_row = set([i for i in board[y]])
+        # determine which values are in the same row
+        in_row = set([i for i in board[y]])
 
-    # determine which values are in the same column
-    in_col = set([i for i in [board[j][x] for j in range(9)]])
+        # determine which values are in the same column
+        in_col = set([i for i in [board[j][x] for j in range(9)]])
 
-    # determine which values are in the same box
-    in_box = set(np.array([i for i in [board[j][boxx*3: boxx*3+3] for j in range(boxy*3,boxy*3+3)]]).flatten())
-    
-    # take the union of all those 
-    not_possible = in_row.union(in_col, in_box)
+        # determine which values are in the same box
+        in_box = set(np.array([i for i in [board[j][boxx*3: boxx*3+3] for j in range(boxy*3,boxy*3+3)]]).flatten())
+        
+        # take the union of all those 
+        not_possible = in_row.union(in_col, in_box)
 
-    # and the possible values are those that remain
-    possible_vals = possible_vals.difference(not_possible)
+        # and the possible values are those that remain
+        possible_vals = possible_vals.difference(not_possible)
 
-    return list(possible_vals)
+        return list(possible_vals)
 
 def to_string(board):
 
@@ -233,39 +262,38 @@ def to_string(board):
 if __name__ == "__main__":
 
 
-    # The following chunk of code comes from https://www.kaggle.com/bryanpark/sudoku
-    # It loads a million sudoku games into matrices conveniently formatted
-
-    import numpy as np
-    quizzes = np.zeros((6, 81), np.int32)
-    solutions = np.zeros((6, 81), np.int32)
-    for i, line in enumerate(open('hardSudokus.csv', 'r').read().splitlines()[1:]):
-        quiz, solution = line.split(",")
-        for j, q_s in enumerate(zip(quiz, solution)):
-            q, s = q_s
-            quizzes[i, j] = q
-            solutions[i, j] = s
-    quizzes = quizzes.reshape((-1, 9, 9))
-    solutions = solutions.reshape((-1, 9, 9))
-
-    board = quizzes[2].tolist()
-
-    #board = np.zeros(shape=(9,9), dtype=int).tolist()
-
-    # Medium difficulty board
-    # board = [[0,0,0,0,6,4,0,0,3],
-    #          [0,3,0,0,0,0,1,0,0],
-    #          [0,8,5,0,0,0,0,0,7],
-    #          [0,5,1,3,0,9,7,0,2],
-    #          [0,7,0,2,0,0,8,0,0],
-    #          [9,2,0,0,7,0,3,5,0],
-    #          [0,0,0,4,2,0,0,0,1],
-    #          [3,0,0,0,1,0,0,0,0],
-    #          [0,9,0,6,8,0,0,0,0]]
+    # Medium difficulty board - default board
+    board = [[0,0,0,0,6,4,0,0,3],
+             [0,3,0,0,0,0,1,0,0],
+             [0,8,5,0,0,0,0,0,7],
+             [0,5,1,3,0,9,7,0,2],
+             [0,7,0,2,0,0,8,0,0],
+             [9,2,0,0,7,0,3,5,0],
+             [0,0,0,4,2,0,0,0,1],
+             [3,0,0,0,1,0,0,0,0],
+             [0,9,0,6,8,0,0,0,0]]
 
     if len(sys.argv) > 2 and sys.argv[2] == '-g':
         show = True
     else:
         show = False
+
+    if len(sys.argv) > 3 and sys.argv[2] == '-b':
+        show = False
+        board = np.zeros(81, np.int32)
+        string = open(sys.argv[3], 'r').read()
+        for index, i in enumerate(string):
+            board[index] = i
+
+        board = board.reshape((9, 9))
+
+    if len(sys.argv) > 4 and sys.argv[2] == '-g' and sys.argv[3] == '-b':
+        show = True
+        board = np.zeros(81, np.int32)
+        string = open(sys.argv[4], 'r').read()
+        for index, i in enumerate(string):
+            board[index] = i
+
+        board = board.reshape((9, 9))
 
     s = Sudoku(board, sys.argv[1], show_graphics=show)

@@ -8,7 +8,9 @@ from copy import deepcopy
 
 class Util:
 
-    def __init__(self):
+    def __init__(self, human=False):
+
+        self.human = human
         self.box_dictionary = {
             0 : [(0,0), (0,1), (0,2),
                  (1,0), (1,1), (1,2),
@@ -79,6 +81,18 @@ class Util:
                     domains[(i,y)] = domain
             except ValueError:
                 pass
+
+        if self.human:
+            comparison = None
+            while not comparison == domains:
+
+                comparison = deepcopy(domains)
+
+                domains = self.naked_set(domains)
+                domains = self.pointing_set(domains)
+                domains = self.box_reduction(domains)
+
+
             
     def hasSingleton(self, domain, cell_list):
         '''
@@ -246,7 +260,7 @@ class Util:
                     if set(domains[cell]) == set(domain):
                         continue
                     
-                    self.remove_if_in_domain(domain, domains, [cell])
+                    domains = self.remove_if_in_domain(domain, domains, [cell])
                             
         return domains
 
@@ -327,7 +341,7 @@ class Util:
             for row in np.arange(9):
                 cells = []
 
-                for col in np.arange(0,9):
+                for col in np.arange(9):
                     # add every cell in this column
                     cells.append((row, col))
                     
@@ -335,10 +349,11 @@ class Util:
                 # look for box reduction in each column
                 domains = self.box_redux_helper(domains, cells)
 
-            for col in np.arange(0,9):
+
+            for col in np.arange(9):
                 cells = []
 
-                for row in np.arange(0,9):
+                for row in np.arange(9):
                     # add every cell in this row
                     cells.append((row, col))
                 
@@ -358,7 +373,7 @@ class Util:
 
             for cell in cells:
 
-                if n in domains[cell] and len(domains[cell]) > 1:
+                if n in domains[cell] :
                     box = self.find_box(cell)
                     boxes.append(box)
 
@@ -370,8 +385,6 @@ class Util:
             if len(boxes) == 1:
                 
                 box = boxes[0]
-
-                print('Box ', box, 'contains all the values', n, 'in these cells:', cells, '\n\n')
 
                 # identify all the cells in that box but not in that row/col 
                 remove_cells = []
