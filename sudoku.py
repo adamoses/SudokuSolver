@@ -2,7 +2,6 @@ from csp import *
 import math
 import numpy as np
 from copy import deepcopy
-import random
 from uninformed_search import *
 import sys
 import util
