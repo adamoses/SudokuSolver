@@ -7,6 +7,7 @@ This package includes a number of algorithms and approaches to solving template 
 This package makes use of the following packages:
 
 [numpy](https://numpy.org/install/)
+
 [pygame](https://www.pygame.org/wiki/GettingStarted)
 
 Instructions to install these packages are linked. 
@@ -17,7 +18,7 @@ copy, queue, math, timeit, and sys
 
 ## Usage
 
-'''
+'''console
 python3 sudoku.py -ALG -g -b BOARD.TXT
 '''
 
