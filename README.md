@@ -18,9 +18,9 @@ copy, queue, math, timeit, and sys
 
 ## Usage
 
-'''console
+```bash
 python3 sudoku.py -ALG -g -b BOARD.TXT
-'''
+```
 
 **-ALG** can be any one of
 
