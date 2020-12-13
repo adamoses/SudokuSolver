@@ -8,7 +8,7 @@ class UninformedSearch:
     def __init__(self, sudoku, informed=False):
 
         self.sudoku = sudoku
-        self.initial_board = sudoku.board
+        self.initial_board = sudoku.board.tolist()
         self.informed = informed
         self.expansions = 0
 
@@ -18,7 +18,7 @@ class UninformedSearch:
 
     def breadthFirst(self):
 
-        board = self.initial_board           
+        board = self.initial_board         
         sudoku = self.sudoku                 
 
         if sudoku.is_goal(board):           # if initial board is goal, return

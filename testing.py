@@ -12,7 +12,7 @@ for b in boards:
 
     board = board.reshape((9, 9))
 
-    Sudoku(board, '-DFS_informed', show_graphics = False)
+    Sudoku(board, '-BFS_informed', show_graphics = False)
 
 
 
