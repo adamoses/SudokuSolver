@@ -33,4 +33,4 @@ python3 sudoku.py -ALG -g -b BOARD.TXT
 
 **-g** specifies whether you would like graphics to be displayed as the algorithm computes
 
-**-b** specifies an input file formatted as just a string of numbers read from the puzzle left to right and top to bottom. 0's are to be used to represent blank squares.
+**-b** specifies an input file formatted as just a string of numbers read from the puzzle left to right and top to bottom. 0's are to be used to represent blank squares. If no input file is specified, it is defaulted to a medium difficulty board.
